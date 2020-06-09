@@ -1,0 +1,10 @@
+C:\Users\Ildar\Documents\PROJECTS\TestTask\GZipTest\GZipTest\obj\Debug\GZipTest.csprojAssemblyReference.cache
+C:\Users\Ildar\Documents\PROJECTS\TestTask\GZipTest\GZipTest\obj\Debug\GZipTest.csproj.CoreCompileInputs.cache
+C:\Users\Ildar\Documents\PROJECTS\TestTask\GZipTest\GZipTest\bin\Debug\GZipTest.exe.config
+C:\Users\Ildar\Documents\PROJECTS\TestTask\GZipTest\GZipTest\bin\Debug\GZipTest.exe
+C:\Users\Ildar\Documents\PROJECTS\TestTask\GZipTest\GZipTest\bin\Debug\GZipTest.pdb
+C:\Users\Ildar\Documents\PROJECTS\TestTask\GZipTest\GZipTest\obj\Debug\GZipTest.csproj.CopyComplete
+C:\Users\Ildar\Documents\PROJECTS\TestTask\GZipTest\GZipTest\obj\Debug\GZipTest.exe
+C:\Users\Ildar\Documents\PROJECTS\TestTask\GZipTest\GZipTest\obj\Debug\GZipTest.pdb
+C:\Users\Ildar\Documents\PROJECTS\TestTask\GZipTest\GZipTest\bin\Debug\Ninject.dll
+C:\Users\Ildar\Documents\PROJECTS\TestTask\GZipTest\GZipTest\bin\Debug\Ninject.xml

@@ -50,13 +50,14 @@
     <Compile Include="Archiver\GZipArchiver.cs" />
     <Compile Include="Archiver\GZipCompressor.cs" />
     <Compile Include="Archiver\GZipDecompressor.cs" />
+    <Compile Include="Exceptions\ArchiverException.cs" />
     <Compile Include="Helpers\ByteConverter.cs" />
     <Compile Include="Infrastructure\NinjectContainer.cs" />
     <Compile Include="Infrastructure\NinjectWrapper.cs" />
     <Compile Include="Infrastructure\SimpleParameter.cs" />
     <Compile Include="Interfaces\IArchiveManager.cs" />
     <Compile Include="Interfaces\IArchiver.cs" />
-    <Compile Include="Interfaces\IBlockQueue.cs" />
+    <Compile Include="Interfaces\IQueue.cs" />
     <Compile Include="Interfaces\ISettingsManager.cs" />
     <Compile Include="Interfaces\IWorker.cs" />
     <Compile Include="Managers\ArchiveManager.cs" />

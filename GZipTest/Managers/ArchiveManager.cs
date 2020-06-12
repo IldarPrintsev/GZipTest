@@ -1,8 +1,6 @@
 ﻿using GZipTest.Interfaces;
 using GZipTest.Workers;
 using System.IO;
-using System;
-using System.Threading;
 
 namespace GZipTest.Managers
 {
@@ -33,15 +31,8 @@ namespace GZipTest.Managers
             {
                 using (var outputStream = new FileStream(outputFilePath, FileMode.CreateNew, FileAccess.Write, FileShare.None, _settingsManager.BufferSize))
                 {
-                    try
-                    {
-                        IWorker compressionWorker = new CompressionWorker(this._settingsManager, inputStream, outputStream);
-                        compressionWorker.Run();
-                    }
-                    catch(Exception ex)
-                    {
-                        throw new Exception(ex.Message);
-                    }
+                    IWorker compressionWorker = new CompressionWorker(this._settingsManager, inputStream, outputStream);
+                    compressionWorker.Run();
                 }
             }
         }
@@ -57,15 +48,8 @@ namespace GZipTest.Managers
             {
                 using (var outputStream = new FileStream(outputFilePath, FileMode.CreateNew, FileAccess.Write, FileShare.None, _settingsManager.BufferSize))
                 {
-                    try
-                    {
-                        IWorker decompressionWorker = new DecompressionWorker(this._settingsManager, inputStream, outputStream);
-                        decompressionWorker.Run();
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new Exception(ex.Message);
-                    }
+                    IWorker decompressionWorker = new DecompressionWorker(this._settingsManager, inputStream, outputStream);
+                    decompressionWorker.Run();
                 }
             }
         }

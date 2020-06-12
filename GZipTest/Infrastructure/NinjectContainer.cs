@@ -41,7 +41,7 @@ namespace GZipTest.Infrastructure
             }
             catch (Exception ex)
             {
-                throw;
+                throw new Exception($"An error occurs during loading the module into the kernel: {ex.Message}", ex);
             }
         }
     }

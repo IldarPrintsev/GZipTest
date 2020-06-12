@@ -9,7 +9,7 @@ namespace GZipTest.Models
     /// <summary>
     ///     Represents a queue of file blocks.
     /// </summary>
-    public sealed class BlockQueue : IBlockQueue
+    public sealed class BlockQueue : IQueue<Block>
     {
         private const int Finished = 1;
 

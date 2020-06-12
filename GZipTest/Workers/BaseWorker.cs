@@ -1,4 +1,5 @@
 ﻿using GZipTest.Interfaces;
+using GZipTest.Exceptions;
 using GZipTest.Models;
 using System;
 using System.IO;
@@ -15,8 +16,8 @@ namespace GZipTest.Workers
         protected readonly Stream _inputStream;
         protected readonly Stream _outputStream;
 
-        protected readonly IBlockQueue _inputQueue;
-        protected readonly IBlockQueue _outputQueue;
+        protected readonly IQueue<Block> _inputQueue;
+        protected readonly IQueue<Block> _outputQueue;
 
         protected readonly byte[] _buffer = new byte[sizeof(long)];
 
@@ -26,7 +27,6 @@ namespace GZipTest.Workers
         /// <param name="settingsManager">Gets system info.</param>
         /// <param name="inputStream">The input stream.</param>
         /// <param name="outputStream">The output stream.</param>
-        /// <param name="interruptEvent">Notifies that interrupting event has occurred.</param>
         protected BaseWorker(ISettingsManager settingsManager, Stream inputStream, Stream outputStream)
         {
             this._settingsManager = settingsManager;
@@ -76,9 +76,15 @@ namespace GZipTest.Workers
                 }
                 _inputQueue.Finish();
             }
+            catch(IOException ex)
+            {
+                this.Finish();
+                throw new IOException($"A stream reading error occurs during file reading: {ex.Message}", ex);
+            }
             catch (Exception ex)
             {
-                throw new IOException(ex.Message);
+                this.Finish();
+                throw new ArchiverException($"An archiver error occurs during file reading: {ex.Message}", ex);
             }
         }
 
@@ -100,9 +106,15 @@ namespace GZipTest.Workers
                     block.StreamContent.Dispose();
                 }
             }
+            catch (IOException ex)
+            {
+                this.Finish();
+                throw new IOException($"A stream writing error occurs during file writing: {ex.Message}", ex);
+            }
             catch (Exception ex)
             {
-                throw new IOException(ex.Message);
+                this.Finish();
+                throw new ArchiverException($"An archiver error occurs during file writing: {ex.Message}", ex);
             }
         }
 
@@ -114,11 +126,11 @@ namespace GZipTest.Workers
         /// <param name="blockSize">The block size.</param>
         protected void CopyBlock(Stream inputStream, Stream outputStream, int blockSize)
         {
-            int bytesOutstanding = blockSize;
+            int remainingBytes = blockSize;
             var buffer = new byte[_settingsManager.BufferSize];
-            while (bytesOutstanding > 0)
+            while (remainingBytes > 0)
             {
-                var bytesToRead = Math.Min(buffer.Length, bytesOutstanding);
+                var bytesToRead = Math.Min(buffer.Length, remainingBytes);
                 var count = inputStream.Read(buffer, offset: 0, count: bytesToRead);
 
                 if (count == 0)
@@ -128,7 +140,7 @@ namespace GZipTest.Workers
 
                 outputStream.Write(buffer, offset: 0, count: count);
 
-                bytesOutstanding -= count;
+                remainingBytes -= count;
             }
         }
 
@@ -148,26 +160,12 @@ namespace GZipTest.Workers
         }
 
         /// <summary>
-        ///     Copies bytes from a stream to a buffer
+        ///     Finishes all operations with the queues.
         /// </summary>
-        /// <param name="inputStream">Input stream.</param>
-        /// <param name="buffer">A byte buffer.</param>
-        /// <param name="byteCount">The byte count.</param>
-        protected void ReadBytes(Stream inputStream, byte[] buffer, int byteCount)
+        protected void Finish()
         {
-            int readBytesCount = 0;
-            int remainingBytesCount = byteCount;
-            while (remainingBytesCount > 0)
-            {
-                var count = inputStream.Read(buffer, readBytesCount, remainingBytesCount);
-                if (count == 0)
-                {
-                    throw new Exception("Input file is unknown.");
-                }
-
-                remainingBytesCount -= count;
-                readBytesCount += count;
-            }
+            this._inputQueue.Finish();
+            this._outputQueue.Finish();
         }
 
         public void Dispose()
@@ -176,12 +174,14 @@ namespace GZipTest.Workers
             GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(bool disposing)
+        protected void Dispose(bool disposing)
         {
             if (disposing)
             {
-                (_outputQueue as IDisposable)?.Dispose();
-                (_inputQueue as IDisposable)?.Dispose();
+                this.Finish();
+
+                (this._inputQueue as IDisposable)?.Dispose();
+                (this._outputQueue as IDisposable)?.Dispose();
             }
         }
     }

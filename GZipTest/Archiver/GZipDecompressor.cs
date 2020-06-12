@@ -21,7 +21,7 @@ namespace GZipTest.Archiver
         /// <param name="outputFilePath">The path of an output original file.</param>
         public override void Run(string inputFilePath, string outputFilePath)
         {
-            Console.WriteLine("File decompression is processing...");
+            Console.WriteLine("\nFile decompression is processing...");
             base._archiveManager.DecompressFile(inputFilePath, outputFilePath);
         }
     }

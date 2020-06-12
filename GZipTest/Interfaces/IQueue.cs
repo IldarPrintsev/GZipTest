@@ -1,25 +1,24 @@
-using GZipTest.Models;
 using System;
 using System.Collections.Generic;
 
 namespace GZipTest.Interfaces
 {
     /// <summary>
-    ///     Provides methods for the queue of file blocks.
+    ///     Provides methods for a queue.
     /// </summary>
-    public interface IBlockQueue
+    public interface IQueue<T>
     {
         /// <summary>
         ///     Adds a new block.
         /// </summary>
-        /// <param name="block">New block.</param>
+        /// <param name="item">New item.</param>
         /// <param name="timeout">A time interval.</param>
-        bool Enqueue(Block block, TimeSpan timeout);
+        bool Enqueue(T item, TimeSpan timeout);
 
         /// <summary>
         ///     Gets all blocks.
         /// </summary>
-        IEnumerable<Block> GetBlocks();
+        IEnumerable<T> GetBlocks();
 
         /// <summary>
         ///     Finishes all operations with the queue.

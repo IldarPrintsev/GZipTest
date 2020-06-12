@@ -1,5 +1,8 @@
 namespace GZipTest.Helpers
 {
+    /// <summary>
+    ///     Converts int and long type values to a byte array.
+    /// </summary>
     public class ByteConverter
     {
         public static void WriteBytes(int value, byte[] byteArray)
@@ -9,7 +12,7 @@ namespace GZipTest.Helpers
             byteArray[2] = (byte)(value >> 16);
             byteArray[3] = (byte)(value >> 24);
         }
-
+        
         public static void WriteBytes(long value, byte[] byteArray)
         {
             var intValue = (int)value;
@@ -25,7 +28,7 @@ namespace GZipTest.Helpers
             byteArray[7] = (byte)(intValue >> 24);
         }
 
-        public static long ReadInt64(byte[] byteArray)
+        public static long ReadBytesToInt64(byte[] byteArray)
         {
             var value = (long) (byteArray[0] | byteArray[1] << 8 | byteArray[2] << 16 | byteArray[3] << 24) |
                         (long) (byteArray[4] | byteArray[5] << 8 | byteArray[6] << 16 | byteArray[7] << 24) << 32;
@@ -33,7 +36,7 @@ namespace GZipTest.Helpers
             return value;
         }
 
-        public static int ReadInt32(byte[] byteArray)
+        public static int ReadBytesToInt32(byte[] byteArray)
         {
             return byteArray[0] | byteArray[1] << 8 | byteArray[2] << 16 | byteArray[3] << 24;
         }

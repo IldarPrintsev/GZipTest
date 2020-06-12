@@ -1,4 +1,5 @@
-﻿using GZipTest.Helpers;
+﻿using GZipTest.Exceptions;
+using GZipTest.Helpers;
 using GZipTest.Interfaces;
 using GZipTest.Models;
 using System;
@@ -66,7 +67,7 @@ namespace GZipTest.Workers
         {
             var inputBlockStream = new MemoryStream(); 
 
-            CopyBlock(_inputStream, inputBlockStream, fileInfo.BlockSize);
+            base.CopyBlock(_inputStream, inputBlockStream, fileInfo.BlockSize);
             inputBlockStream.Position = 0;
 
             return new Block(id, inputBlockStream);
@@ -106,19 +107,25 @@ namespace GZipTest.Workers
 
                     using (var gZipStream = new GZipStream(compressStream, CompressionMode.Compress, true))
                     {
-                        CopyStream(inputBlock.StreamContent, gZipStream);
+                        base.CopyStream(inputBlock.StreamContent, gZipStream);
                     }
 
                     compressStream.Position = 0;
 
                     inputBlock.StreamContent.Dispose();
 
-                    _outputQueue.Enqueue(new Block(inputBlock.Id, compressStream), Timeout.InfiniteTimeSpan);
+                    base._outputQueue.Enqueue(new Block(inputBlock.Id, compressStream), Timeout.InfiniteTimeSpan);
                 }
+            }
+            catch (IOException ex)
+            {
+                base.Finish();
+                throw new IOException($"A stream writing error occurs during file compression: {ex.Message}", ex);
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException(ex.Message);
+                base.Finish();
+                throw new ArchiverException($"An archiver error occurs during file compression: {ex.Message}", ex);
             }
         }
 
@@ -128,7 +135,7 @@ namespace GZipTest.Workers
         private void WriteInt32(int value)
         {
             ByteConverter.WriteBytes(value, _buffer);
-            this._outputStream.Write(_buffer, 0, sizeof(int));
+            this.WriteBytes(_buffer, _outputStream, sizeof(int));
         }
 
         /// <summary>
@@ -137,7 +144,18 @@ namespace GZipTest.Workers
         private void WriteInt64(long value)
         {
             ByteConverter.WriteBytes(value, _buffer);
-            this._outputStream.Write(_buffer, 0, sizeof(long));
+            this.WriteBytes(_buffer, _outputStream, sizeof(long));
+        }
+
+        /// <summary>
+        ///     Copies bytes from the buffer to the stream.
+        /// </summary>
+        /// <param name="buffer">A byte buffer.</param>
+        /// <param name="outputStream">Output stream.</param>
+        /// <param name="byteCount">The byte count.</param>
+        private void WriteBytes(byte[] buffer, Stream outputStream, int byteCount)
+        {
+            outputStream.Write(buffer, 0, byteCount);
         }
     }
 }

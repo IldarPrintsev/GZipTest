@@ -21,7 +21,7 @@ namespace GZipTest.Archiver
         /// <param name="outputFilePath">The path of an output compressed file.</param>
         public override void Run(string inputFilePath, string outputFilePath)
         {
-            Console.WriteLine("File compression is processing...");
+            Console.WriteLine("\nFile compression is processing...");
             base._archiveManager.CompressFile(inputFilePath, outputFilePath);
         }
     }

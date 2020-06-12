@@ -1,5 +1,6 @@
 ﻿using GZipTest.Helpers;
 using GZipTest.Interfaces;
+using GZipTest.Exceptions;
 using GZipTest.Models;
 using System;
 using System.Collections.Generic;
@@ -76,24 +77,24 @@ namespace GZipTest.Workers
         /// <param name="fileInfo">File information.</param>
         protected override Block ReadBlock(int id, FileInformation fileInfo)
         {
-            var newId = ReadInt32();
-            if (newId < 0 || newId >= fileInfo.BlockCount)
+            var blockId = ReadInt32();
+            if (blockId < 0 || blockId >= fileInfo.BlockCount)
             {
-                throw new Exception("Input file is unknown.");
+                throw new ArchiverException("Input file format is unknown.");
             }
 
             var blockLength = ReadInt32();
             if (blockLength <= 0)
             {
-                throw new Exception("Input file is unknown.");
+                throw new ArchiverException("Input file format is unknown.");
             }
 
-            var newInputStream = new MemoryStream();
+            var inputStream = new MemoryStream();
 
-            CopyBlock(base._inputStream, newInputStream, blockLength);
-            newInputStream.Position = 0;
+            CopyBlock(base._inputStream, inputStream, blockLength);
+            inputStream.Position = 0;
 
-            return new Block(newId, newInputStream);
+            return new Block(blockId, inputStream);
         }
 
         /// <summary>
@@ -123,25 +124,31 @@ namespace GZipTest.Workers
         {
             try
             {
-                foreach (var inputBlock in _inputQueue.GetBlocks())
+                foreach (var inputBlock in this._inputQueue.GetBlocks())
                 {
                     var decompessStream = new MemoryStream();
 
                     using (var gZipStream = new GZipStream(inputBlock.StreamContent, CompressionMode.Decompress, leaveOpen: true))
                     {
-                        CopyStream(gZipStream, decompessStream);
+                        base.CopyStream(gZipStream, decompessStream);
                     }
 
                     decompessStream.Position = 0;
 
                     inputBlock.StreamContent.Dispose();
 
-                    _outputQueue.Enqueue(new Block(inputBlock.Id, decompessStream), Timeout.InfiniteTimeSpan);
+                    base._outputQueue.Enqueue(new Block(inputBlock.Id, decompessStream), Timeout.InfiniteTimeSpan);
                 }
+            }
+            catch (IOException ex)
+            {
+                base.Finish();
+                throw new IOException($"A stream writing error occurs during file decompression: {ex.Message}", ex);
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException(ex.Message);
+                base.Finish();
+                throw new ArchiverException($"An archiver error occurs during file decompression: {ex.Message}", ex);
             }
         }
 
@@ -151,7 +158,7 @@ namespace GZipTest.Workers
         private long ReadInt64()
         {
             ReadBytes(this._inputStream, _buffer, sizeof(long));
-            return ByteConverter.ReadInt64(_buffer);
+            return ByteConverter.ReadBytesToInt64(_buffer);
         }
 
         /// <summary>
@@ -160,7 +167,30 @@ namespace GZipTest.Workers
         private int ReadInt32()
         {
             ReadBytes(this._inputStream, _buffer, sizeof(int));
-            return ByteConverter.ReadInt32(_buffer);
+            return ByteConverter.ReadBytesToInt32(_buffer);
+        }
+
+        /// <summary>
+        ///     Copies bytes from the stream to the buffer.
+        /// </summary>
+        /// <param name="inputStream">Input stream.</param>
+        /// <param name="buffer">A byte buffer.</param>
+        /// <param name="byteCount">The byte count.</param>
+        private void ReadBytes(Stream inputStream, byte[] buffer, int byteCount)
+        {
+            int readBytesCount = 0;
+            int remainingBytesCount = byteCount;
+            while (remainingBytesCount > 0)
+            {
+                var count = inputStream.Read(buffer, readBytesCount, remainingBytesCount);
+                if (count == 0)
+                {
+                    throw new IOException("Input file is unknown.");
+                }
+
+                remainingBytesCount -= count;
+                readBytesCount += count;
+            }
         }
     }
 }

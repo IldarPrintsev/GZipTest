@@ -1,4 +1,6 @@
-﻿namespace GZipTest.Interfaces
+﻿using GZipTest.Common;
+
+namespace GZipTest.Interfaces
 {
     /// <summary>
     ///     Defines the methods for an archive manager.
@@ -6,17 +8,11 @@
     public interface IArchiveManager
     {
         /// <summary>
-        ///     Compresses the file.
+        ///     Executes the selected archive operation.
         /// </summary>
+        /// <param name="operationType">The type of archive operation.</param>
         /// <param name="inputFilePath">The path of an input file.</param>
         /// <param name="outputFilePath">The path of an output compressed file.</param>
-        void CompressFile(string inputFilePath, string outputFilePath);
-
-        /// <summary>
-        ///     Decompresses the file.
-        /// </summary>
-        /// <param name="inputFilePath">The path of an input compressed file.</param>
-        /// <param name="outputFilePath">The path of an output original file.</param>
-        void DecompressFile(string inputFilePath, string outputFilePath);
+        void Execute(OperationType operationType, string inputFilePath, string outputFilePath);
     }
 }

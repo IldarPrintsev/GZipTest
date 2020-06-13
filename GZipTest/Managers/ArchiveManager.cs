@@ -1,4 +1,5 @@
-﻿using GZipTest.Interfaces;
+﻿using GZipTest.Common;
+using GZipTest.Interfaces;
 using GZipTest.Workers;
 using System.IO;
 
@@ -21,39 +22,24 @@ namespace GZipTest.Managers
         }
 
         /// <summary>
-        ///     Compresses the file.
+        ///     Executes the selected archive operation.
         /// </summary>
+        /// <param name="operationType">The type of archive operation.</param>
         /// <param name="inputFilePath">The path of an input file.</param>
         /// <param name="outputFilePath">The path of an output compressed file.</param>
-        public void CompressFile(string inputFilePath, string outputFilePath)
+        public void Execute(OperationType operationType, string inputFilePath, string outputFilePath)
         {
             using (var inputStream = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, _settingsManager.BufferSize))
             {
                 using (var outputStream = new FileStream(outputFilePath, FileMode.CreateNew, FileAccess.Write, FileShare.None, _settingsManager.BufferSize))
                 {
-                    using (IWorker compressionWorker = new CompressionWorker(this._settingsManager, inputStream, outputStream))
+                    IWorker worker;
+                    using (operationType == OperationType.Compress
+                        ? worker = new CompressionWorker(this._settingsManager, inputStream, outputStream)
+                        : worker = new DecompressionWorker(this._settingsManager, inputStream, outputStream))
                     {
-                        compressionWorker.Run();
-                    }    
-                }
-            }
-        }
-
-        /// <summary>
-        ///     Decompresses the file.
-        /// </summary>
-        /// <param name="inputFilePath">The path of an input compressed file.</param>
-        /// <param name="outputFilePath">The path of an output original file.</param>
-        public void DecompressFile(string inputFilePath, string outputFilePath)
-        {
-            using (var inputStream = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, _settingsManager.BufferSize))
-            {
-                using (var outputStream = new FileStream(outputFilePath, FileMode.CreateNew, FileAccess.Write, FileShare.None, _settingsManager.BufferSize))
-                {
-                    using (IWorker decompressionWorker = new DecompressionWorker(this._settingsManager, inputStream, outputStream))
-                    {
-                        decompressionWorker.Run();
-                    } 
+                        worker.Run();
+                    }
                 }
             }
         }

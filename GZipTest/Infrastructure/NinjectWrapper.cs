@@ -23,15 +23,15 @@ namespace GZipTest.Infrastructure
         /// <summary>
         ///     Gets an implementation of an interface.
         /// </summary>
-        public T Get<T>(string param = null)
+        public T Get<T, K>(K param = default)
         {
-            if (param == null)
+            if (param == default)
             {
                 return _kernel.GetAll<T>().FirstOrDefault();
             }
             else
             {
-                return _kernel.GetAll<T>(new SimpleParameter<string>(param)).FirstOrDefault();
+                return _kernel.GetAll<T>(new SimpleParameter<K>(param)).FirstOrDefault();
             }
         }
     }

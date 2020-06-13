@@ -1,6 +1,8 @@
-﻿using GZipTest.Infrastructure;
+﻿using GZipTest.Exceptions;
+using GZipTest.Infrastructure;
+using GZipTest.Common;
 using GZipTest.Interfaces;
-using GZipTest.Exceptions;
+using GZipTest.Models;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -17,15 +19,15 @@ namespace GZipTest
             {
                 AddUnhandledExceptionHandler();
 
-                CheckArguments(args);
+                var inputData = CheckArguments(args);
 
                 var wrapper = new NinjectWrapper();
-                archiver = wrapper.Get<IArchiver>(args[0]);
+                archiver = wrapper.Get<IArchiver, OperationType>(inputData.OperationType);
 
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
 
-                archiver.Run(args[1], args[2]);
+                archiver.Run(inputData.InputFilePath, inputData.OutputFilePath);
 
                 stopwatch.Stop();
 
@@ -94,7 +96,7 @@ namespace GZipTest
         /// </summary>
         private static void AddUnhandledExceptionHandler()
         {
-            AppDomain.CurrentDomain.UnhandledException += (o, e) => 
+            AppDomain.CurrentDomain.UnhandledException += (o, e) =>
             {
                 Console.Error.WriteLine($"An unhandled exception occurs: {e}");
                 ShowInfo();
@@ -104,17 +106,25 @@ namespace GZipTest
         /// <summary>
         ///    Check the arguments.
         /// </summary>
-        private static void CheckArguments(string[] args)
+        private static InputData CheckArguments(string[] args)
         {
             if (args == null || args.Length != 3)
             {
                 throw new ArgumentException("Three command-line parameters are expected: operation type (compress or decompress), input file path, output file path.");
-            }  
+            }
 
             string operationString = args[0].ToLower();
-            if (!(string.Equals(operationString, "compress") || string.Equals(operationString, "decompress")))
+            OperationType operationType;
+            switch (operationString)
             {
-                throw new ArgumentException($"Unsupported operation: {operationString}. Supported operations: compress, decompress.");
+                case "compress":
+                    operationType = OperationType.Compress;
+                    break;
+                case "decompress":
+                    operationType = OperationType.Decompress;
+                    break;
+                default:
+                    throw new ArgumentException($"Unsupported operation: {operationString}. Supported operations: compress, decompress.");
             }
 
             string inputFilePath = args[1];
@@ -142,25 +152,27 @@ namespace GZipTest
             var inputFile = new FileInfo(args[1]);
             var outputFile = new FileInfo(args[2]);
 
-            if (operationString == "compress" && inputFile.Extension == ".gz")
+            if (operationType == OperationType.Compress && inputFile.Extension == ".gz")
             {
                 throw new ArgumentException("File has already been compressed.");
             }
 
-            if (operationString == "compress" && outputFile.Extension != ".gz")
+            if (operationType == OperationType.Compress && outputFile.Extension != ".gz")
             {
                 throw new ArgumentException("Output file must have .gz extension. Change file's name.");
             }
 
-            if (operationString == "decompress" && inputFile.Extension != ".gz")
+            if (operationType == OperationType.Decompress && inputFile.Extension != ".gz")
             {
                 throw new ArgumentException("Input file must have .gz extension.");
             }
 
-            if (operationString == "decompress" && outputFile.Extension == ".gz")
+            if (operationType == OperationType.Decompress && outputFile.Extension == ".gz")
             {
                 throw new ArgumentException("Output file shouldn't have .gz extension. Change file's name.");
             }
+
+            return new InputData(operationType, inputFilePath, outputFilePath);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using GZipTest.Interfaces;
+﻿using GZipTest.Common;
+using GZipTest.Interfaces;
 using System;
 
 namespace GZipTest.Archiver
@@ -22,7 +23,7 @@ namespace GZipTest.Archiver
         public override void Run(string inputFilePath, string outputFilePath)
         {
             Console.WriteLine("\nFile compression is processing...");
-            base._archiveManager.CompressFile(inputFilePath, outputFilePath);
+            base._archiveManager.Execute(OperationType.Compress, inputFilePath, outputFilePath);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using GZipTest.Archiver;
+using GZipTest.Common;
 using GZipTest.Interfaces;
 using GZipTest.Managers;
 using Ninject.Modules;
@@ -26,16 +27,16 @@ namespace GZipTest.Infrastructure
                 this.Bind<IArchiver>().To<GZipCompressor>()
                     .When(r =>
                     {
-                        var prm = r.Parameters.OfType<SimpleParameter<string>>().SingleOrDefault();
-                        return string.Equals(prm.Value, "compress");
+                        var prm = r.Parameters.OfType<SimpleParameter<OperationType>>().SingleOrDefault();
+                        return string.Equals(prm.Value, OperationType.Compress);
                     }
                     );
 
                 this.Bind<IArchiver>().To<GZipDecompressor>()
                     .When(r =>
                     {
-                        var prm = r.Parameters.OfType<SimpleParameter<string>>().SingleOrDefault();
-                        return string.Equals(prm.Value, "decompress");
+                        var prm = r.Parameters.OfType<SimpleParameter<OperationType>>().SingleOrDefault();
+                        return string.Equals(prm.Value, OperationType.Decompress);
                     }
                     );
             }

@@ -21,6 +21,8 @@ namespace GZipTest.Workers
 
         protected readonly byte[] _buffer = new byte[sizeof(long)];
 
+        private bool disposed = false;
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="BaseWorker"/> class.
         /// </summary>
@@ -168,6 +170,8 @@ namespace GZipTest.Workers
             this._outputQueue.Finish();
         }
 
+        #region Dispose pattern
+
         public void Dispose()
         {
             Dispose(true);
@@ -176,13 +180,15 @@ namespace GZipTest.Workers
 
         protected void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!disposed)
             {
-                this.Finish();
-
-                (this._inputQueue as IDisposable)?.Dispose();
-                (this._outputQueue as IDisposable)?.Dispose();
+                if (disposing)
+                {
+                    this.Finish();
+                }
+                disposed = true;
             }
         }
+        #endregion
     }
 }

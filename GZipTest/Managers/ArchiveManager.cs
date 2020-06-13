@@ -31,8 +31,10 @@ namespace GZipTest.Managers
             {
                 using (var outputStream = new FileStream(outputFilePath, FileMode.CreateNew, FileAccess.Write, FileShare.None, _settingsManager.BufferSize))
                 {
-                    IWorker compressionWorker = new CompressionWorker(this._settingsManager, inputStream, outputStream);
-                    compressionWorker.Run();
+                    using (IWorker compressionWorker = new CompressionWorker(this._settingsManager, inputStream, outputStream))
+                    {
+                        compressionWorker.Run();
+                    }    
                 }
             }
         }
@@ -48,8 +50,10 @@ namespace GZipTest.Managers
             {
                 using (var outputStream = new FileStream(outputFilePath, FileMode.CreateNew, FileAccess.Write, FileShare.None, _settingsManager.BufferSize))
                 {
-                    IWorker decompressionWorker = new DecompressionWorker(this._settingsManager, inputStream, outputStream);
-                    decompressionWorker.Run();
+                    using (IWorker decompressionWorker = new DecompressionWorker(this._settingsManager, inputStream, outputStream))
+                    {
+                        decompressionWorker.Run();
+                    } 
                 }
             }
         }

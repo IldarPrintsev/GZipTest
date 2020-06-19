@@ -19,7 +19,7 @@ namespace GZipTest.Workers
         protected readonly IQueue<Block> _inputQueue;
         protected readonly IQueue<Block> _outputQueue;
 
-        protected readonly byte[] _buffer = new byte[sizeof(long)];
+        protected byte[] _buffer = new byte[sizeof(long)];
 
         private bool disposed = false;
 

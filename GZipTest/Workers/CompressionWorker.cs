@@ -134,7 +134,7 @@ namespace GZipTest.Workers
         /// </summary>
         private void WriteInt32(int value)
         {
-            ByteConverter.WriteBytes(value, _buffer);
+            ByteConverter.WriteBytes(value, ref _buffer);
             this.WriteBytes(_buffer, _outputStream, sizeof(int));
         }
 
@@ -143,7 +143,7 @@ namespace GZipTest.Workers
         /// </summary>
         private void WriteInt64(long value)
         {
-            ByteConverter.WriteBytes(value, _buffer);
+            ByteConverter.WriteBytes(value, ref _buffer);
             this.WriteBytes(_buffer, _outputStream, sizeof(long));
         }
 
